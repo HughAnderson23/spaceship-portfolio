@@ -1,0 +1,29 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+#landing-page {
+    background-color: #1a1a1a;
+    color: white;
+    text-align: center;
+}
+
+.content {
+    padding: 20px;
+}
+
+h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 1.5em;
+}
+
+#canvas-container {
+    background-color: #000;
+}
