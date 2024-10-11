@@ -23,7 +23,7 @@ function init() {
     const loader = new GLTFLoader();
     loader.load('/assets/models/spaceship.glb', (gltf) => {
         spaceship = gltf.scene;
-        
+        //
         // Apply flat shading to all meshes in the model
         spaceship.traverse((child) => {
             if (child.isMesh) {
