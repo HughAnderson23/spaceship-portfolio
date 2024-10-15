@@ -119,7 +119,7 @@ function onKeyPress(event) {
         document.getElementById('canvas-container').style.display = 'flex';
     }
 }
-
+// Need to fix mouse movement
 // Handle mouse movement
 function onMouseMove(event) {
     // Calculate mouse position in normalized device coordinates (-1 to +1)
