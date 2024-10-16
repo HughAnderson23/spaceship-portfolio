@@ -14,6 +14,9 @@ let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
 
+// Mouse position
+const mouse = new THREE.Vector2();
+
 // Initialize the scene
 function init() {
     // Create the scene
@@ -46,6 +49,10 @@ function init() {
             playerMesh = gltf.scene;
             playerMesh.scale.set(0.5, 0.5, 0.5); // Adjust scale as needed
             playerMesh.position.set(0, 1, 0);
+            
+            // Rotate the ship 90 degrees around the X-axis
+            playerMesh.rotation.x = Math.PI / 2;
+            
             scene.add(playerMesh);
         },
         function (xhr) {
@@ -106,21 +113,8 @@ function onKeyPress(event) {
 }
 
 function onMouseMove(event) {
-    if (!playerMesh) return;
-
-    const mouse = new THREE.Vector2();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1);
-    const intersectPoint = new THREE.Vector3();
-    raycaster.ray.intersectPlane(groundPlane, intersectPoint);
-
-    if (intersectPoint) {
-        playerMesh.lookAt(intersectPoint.x, playerMesh.position.y, intersectPoint.z);
-    }
 }
 
 function onMouseWheel(event) {
@@ -139,20 +133,45 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+function updatePlayerMovement() {
+    if (!playerMesh) return;
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1);
+    const intersectPoint = new THREE.Vector3();
+    raycaster.ray.intersectPlane(groundPlane, intersectPoint);
+
+    // Calculate direction to mouse
+    const directionToMouse = new THREE.Vector3().subVectors(intersectPoint, playerMesh.position).normalize();
+    
+    // Calculate perpendicular directions
+    const perpendicularLeft = new THREE.Vector3(-directionToMouse.z, 0, directionToMouse.x).normalize();
+    const perpendicularRight = perpendicularLeft.clone().negate();
+
+    let moveDirection = new THREE.Vector3(0, 0, 0);
+
+    if (moveForward) moveDirection.add(directionToMouse);
+    if (moveBackward) moveDirection.sub(directionToMouse);
+    if (moveLeft) moveDirection.add(perpendicularLeft);
+    if (moveRight) moveDirection.add(perpendicularRight);
+
+    moveDirection.normalize().multiplyScalar(playerSpeed);
+
+    playerMesh.position.add(moveDirection);
+
+    // Update player rotation
+    if (intersectPoint) {
+        playerMesh.lookAt(intersectPoint.x, playerMesh.position.y, intersectPoint.z);
+        playerMesh.rotateX(Math.PI / 2); // Correct the rotation after lookAt
+    }
+}
+
 function animate() {
     requestAnimationFrame(animate);
 
     if (playerMesh) {
-        let moveX = 0;
-        let moveZ = 0;
-
-        if (moveForward) moveZ -= playerSpeed;
-        if (moveBackward) moveZ += playerSpeed;
-        if (moveLeft) moveX -= playerSpeed;
-        if (moveRight) moveX += playerSpeed;
-
-        playerMesh.position.x += moveX;
-        playerMesh.position.z += moveZ;
+        updatePlayerMovement();
 
         camera.position.x = playerMesh.position.x;
         camera.position.z = playerMesh.position.z + 20;
