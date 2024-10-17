@@ -1,5 +1,3 @@
-// Assuming you have Three.js and other required libraries loaded in your HTML file
-
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -16,6 +14,9 @@ let moveRight = false;
 
 // Mouse position
 const mouse = new THREE.Vector2();
+
+// Number of stars
+const numStars = 1000;
 
 // Initialize the scene
 function init() {
@@ -63,18 +64,8 @@ function init() {
         }
     );
 
-    // Create fake stars in the background
-    const starGeometry = new THREE.SphereGeometry(0.1, 24, 24);
-    const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    for (let i = 0; i < 200; i++) {
-        const star = new THREE.Mesh(starGeometry, starMaterial);
-        star.position.set(
-            (Math.random() - 0.5) * 500,
-            (Math.random() - 0.5) * 500,
-            (Math.random() - 0.5) * 500
-        );
-        scene.add(star);
-    }
+    // Create instanced stars with random size and brightness
+    createInstancedStars();
 
     // Add event listeners
     document.addEventListener('keydown', onKeyDown, false);
@@ -86,6 +77,39 @@ function init() {
 
     animate();
 }
+
+function createInstancedStars() {
+    const starGeometry = new THREE.SphereGeometry(0.5, 8, 8); // Increase the base size of the stars
+    const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const instancedStars = new THREE.InstancedMesh(starGeometry, starMaterial, numStars);
+    scene.add(instancedStars);
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < numStars; i++) {
+        // Set random position
+        dummy.position.set(
+            (Math.random() - 0.5) * 2000,
+            (Math.random() - 0.5) * 2000,
+            (Math.random() - 0.5) * 2000
+        );
+
+        // Set larger random scale (star size)
+        const scale = Math.random() * 1.5 + 0.5; // Increase the size range: 0.5 to 2
+        dummy.scale.set(scale, scale, scale);
+
+        // Update matrix for instancing
+        dummy.updateMatrix();
+        instancedStars.setMatrixAt(i, dummy.matrix);
+
+        // Set random brightness by adjusting the material's color
+        const brightness = Math.random() * 0.7 + 0.3; // 0.3 to 1 range
+        instancedStars.setColorAt(i, new THREE.Color(brightness, brightness, brightness));
+    }
+
+    instancedStars.instanceMatrix.needsUpdate = true;
+    instancedStars.instanceColor.needsUpdate = true;
+}
+
 
 function onKeyDown(event) {
     switch (event.code) {
