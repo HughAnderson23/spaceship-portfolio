@@ -12,11 +12,12 @@ let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
 
+
 // Mouse position
 const mouse = new THREE.Vector2();
 
 // Number of stars
-const numStars = 1000;
+const numStars = 10000;
 
 // Initialize the scene
 function init() {
@@ -88,13 +89,13 @@ function createInstancedStars() {
     for (let i = 0; i < numStars; i++) {
         // Set random position
         dummy.position.set(
-            (Math.random() - 0.5) * 2000,
-            (Math.random() - 0.5) * 2000,
-            (Math.random() - 0.5) * 2000
+            (Math.random() - 0.5) * 1500,
+            (Math.random() - 0.5) * 1500,
+            (Math.random() - 0.5) * 1500
         );
 
-        // Set larger random scale (star size)
-        const scale = Math.random() * 1.5 + 0.5; // Increase the size range: 0.5 to 2
+        // Set smaller random scale (star size)
+        const scale = Math.random() * 0.5 + 0.1; // Decreased range: 0.1 to 0.6
         dummy.scale.set(scale, scale, scale);
 
         // Update matrix for instancing
